@@ -6,6 +6,7 @@ import "./Todo.css";
 function Todo() {
   const [todoInput, setTodoInput] = useState("");
   const [todos, setTodos] = useState([]);
+  const [editId,setEditid] =useState(0)
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,8 +17,19 @@ function Todo() {
   };
 
   const handleTodos = () => {
+    if(todoInput!==""){
     setTodos([...todos,{id:Date.now(),todoInput:todoInput,status:false}]);
     setTodoInput("");
+    }
+    if(editId){
+      const editTodo=todos.find((task)=>task.id===editId)
+      const updateTodo=todos.map((task)=>task.id===editTodo.id
+      ?(task={id:task.id,todoInput:todoInput})
+      :(task={id:task.id,todoInput:task.todoInput}))
+      setTodos(updateTodo)
+      setTodoInput("")
+      setEditid(0)
+    }
   };
   
   const onComplete=(id)=>{
@@ -29,13 +41,17 @@ function Todo() {
         }
      })
      setTodos(complete)
-  }
+  }  
   const handleDelete=(id)=>{
       setTodos(todos.filter((task)=>task.id!==id))
   }
+  const handleEdit=(id)=>{
+    const editTodo=todos.find((task)=>task.id===id)
+    setTodoInput(editTodo.todoInput)
+    setEditid(editTodo.id)
+  }
 
   const inputRef = useRef("null");
-
   useEffect(() => {
     // console.log(inputRef.current)
     inputRef.current.focus();
@@ -53,7 +69,7 @@ function Todo() {
           className="form-control"
           onChange={handleInput}
         />
-        <button onClick={handleTodos}>ADD</button>
+        <button onClick={handleTodos}>{editId?"EDIT":"ADD"}</button>
       </form>
       <div className="list">
         <ul>
@@ -71,6 +87,7 @@ function Todo() {
                   className="list-item-icons"
                   id="edit"
                   title="Edit"
+                  onClick={()=>handleEdit(task.id)}
                 />
                 <AiFillDelete
                   onClick={()=>handleDelete(task.id)}

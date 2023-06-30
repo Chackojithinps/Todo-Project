@@ -6,7 +6,18 @@ import "./Todo.css";
 function Todo() {
   const [todoInput, setTodoInput] = useState("");
   const [todos, setTodos] = useState([]);
-  const [editId,setEditid] =useState(0)
+  const [editId, setEditid] = useState(0);
+  const Local_Storage_Key = "react-app-todos";
+
+  useEffect(() => {
+    const storedItem = JSON.parse(localStorage.getItem(Local_Storage_Key));
+    if (storedItem) setTodos(storedItem);
+  }, []);
+  useEffect(() => {
+    if (todos.length > 0) {
+      localStorage.setItem(Local_Storage_Key, JSON.stringify(todos));
+    }
+  }, [todos]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -17,41 +28,52 @@ function Todo() {
   };
 
   const handleTodos = () => {
-    if(todoInput!==""){
-    setTodos([...todos,{id:Date.now(),todoInput:todoInput,status:false}]);
-    setTodoInput("");
+    if (todoInput !== "") {
+      setTodos([
+        ...todos,
+        { id: Date.now(), todoInput: todoInput, status: false },
+      ]);
+      setTodoInput("");
     }
-    if(editId){
-      const editTodo=todos.find((task)=>task.id===editId)
-      const updateTodo=todos.map((task)=>task.id===editTodo.id
-      ?(task={id:task.id,todoInput:todoInput})
-      :(task={id:task.id,todoInput:task.todoInput}))
-      setTodos(updateTodo)
-      setTodoInput("")
-      setEditid(0)
+    if (editId) {
+      const editTodo = todos.find((task) => task.id === editId);
+      const updateTodo = todos.map((task) =>
+        task.id === editTodo.id
+          ? (task = { id: task.id, todoInput: todoInput })
+          : (task = { id: task.id, todoInput: task.todoInput })
+      );
+      setTodos(updateTodo);
+      setTodoInput("");
+      setEditid(0);
     }
   };
-  
-  const onComplete=(id)=>{
-     let complete=todos.map((task)=>{
-        if(task.id===id){
-          return ({...task,status:!task.status})
-        }else{
-          return task
-        }
-     })
-     setTodos(complete)
-  }  
-  const handleDelete=(id)=>{
-      setTodos(todos.filter((task)=>task.id!==id))
-  }
-  const handleEdit=(id)=>{
-    const editTodo=todos.find((task)=>task.id===id)
-    setTodoInput(editTodo.todoInput)
-    setEditid(editTodo.id)
-  }
+
+  const onComplete = (id) => {
+    let complete = todos.map((task) => {
+      if (task.id === id) {
+        return { ...task, status: !task.status };
+      } else {
+        return task;
+      }
+    });
+    setTodos(complete);
+  };
+  const handleDelete = (id) => {
+    // setTodos(todos.filter((task) => task.id !== id));
+    setTodos((prevState)=>{
+      const updateTodos=prevState.filter((item)=>item.id!==id)
+      localStorage.setItem(Local_Storage_Key,JSON.stringify(updateTodos))
+      return updateTodos;
+    })
+  };
+  const handleEdit = (id) => {
+    const editTodo = todos.find((task) => task.id === id);
+    setTodoInput(editTodo.todoInput);
+    setEditid(editTodo.id);
+  };
 
   const inputRef = useRef("null");
+
   useEffect(() => {
     // console.log(inputRef.current)
     inputRef.current.focus();
@@ -69,28 +91,33 @@ function Todo() {
           className="form-control"
           onChange={handleInput}
         />
-        <button onClick={handleTodos}>{editId?"EDIT":"ADD"}</button>
+        <button onClick={handleTodos}>{editId ? "EDIT" : "ADD"}</button>
       </form>
       <div className="list">
         <ul>
           {todos.map((task) => (
             <li className="list-items">
-              <div className="list-item-list" id={task.status?"list-item":null}>{task.todoInput}</div>
+              <div
+                className="list-item-list"
+                id={task.status ? "list-item" : null}
+              >
+                {task.todoInput}
+              </div>
               <span>
                 <BsCheck2All
                   className="list-item-icons"
                   id="complete"
                   title="Complete"
-                  onClick={()=>onComplete(task.id)}
+                  onClick={() => onComplete(task.id)}
                 />
                 <BiSolidEdit
                   className="list-item-icons"
                   id="edit"
                   title="Edit"
-                  onClick={()=>handleEdit(task.id)}
+                  onClick={() => handleEdit(task.id)}
                 />
                 <AiFillDelete
-                  onClick={()=>handleDelete(task.id)}
+                  onClick={() => handleDelete(task.id)}
                   className="list-item-icons"
                   id="delete"
                   title="Delete"

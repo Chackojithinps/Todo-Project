@@ -59,3 +59,12 @@ li{
 #delete{
     color: orange;
 }
+
+#delete,#edit,#complete:hover{
+    cursor: pointer;
+}
+
+#list-item{
+    text-decoration: line-through;
+    opacity: 0.3;
+}

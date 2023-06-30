@@ -16,9 +16,23 @@ function Todo() {
   };
 
   const handleTodos = () => {
-    setTodos([...todos, todoInput]);
+    setTodos([...todos,{id:Date.now(),todoInput:todoInput,status:false}]);
     setTodoInput("");
   };
+  
+  const onComplete=(id)=>{
+     let complete=todos.map((task)=>{
+        if(task.id===id){
+          return ({...task,status:!task.status})
+        }else{
+          return task
+        }
+     })
+     setTodos(complete)
+  }
+  const handleDelete=(id)=>{
+      setTodos(todos.filter((task)=>task.id!==id))
+  }
 
   const inputRef = useRef("null");
 
@@ -45,12 +59,13 @@ function Todo() {
         <ul>
           {todos.map((task) => (
             <li className="list-items">
-              <div className="list-item-list">{task}</div>
+              <div className="list-item-list" id={task.status?"list-item":null}>{task.todoInput}</div>
               <span>
                 <BsCheck2All
                   className="list-item-icons"
                   id="complete"
                   title="Complete"
+                  onClick={()=>onComplete(task.id)}
                 />
                 <BiSolidEdit
                   className="list-item-icons"
@@ -58,6 +73,7 @@ function Todo() {
                   title="Edit"
                 />
                 <AiFillDelete
+                  onClick={()=>handleDelete(task.id)}
                   className="list-item-icons"
                   id="delete"
                   title="Delete"
